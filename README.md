@@ -1,12 +1,57 @@
-# Starter Next/Hardhat Project
 
-After cloning the github, you will want to do the following to get the code running on your computer.
+# Metacrafters ATM
 
-1. Inside the project directory, in the terminal type: npm i
-2. Open two additional terminals in your VS code
-3. In the second terminal type: npx hardhat node
-4. In the third terminal, type: npx hardhat run --network localhost scripts/deploy.js
-5. Back in the first terminal, type npm run dev to launch the front-end.
+A web3 application for interacting with an Ethereum-based ATM smart contract using ethers.js.
 
-After this, the project will be running on your localhost. 
-Typically at http://localhost:3000/
+## Description
+
+This project allows users to connect their MetaMask wallet to an Ethereum smart contract and perform basic operations such as deposit and withdrawal of funds. It provides a user-friendly interface to view account balance and transaction history.
+
+## Getting Started
+
+### Installing
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/metacrafters-atm.git
+   ```
+2. Navigate to the project directory:
+   ```bash
+   cd metacrafters-atm
+   ```
+3. Install the required dependencies:
+   ```bash
+   npm install
+   ```
+4. Ensure you have MetaMask installed in your browser.
+
+### Executing program
+
+1. Start the development server:
+   ```bash
+   npm run dev
+   ```
+2. Open your browser and go to:
+   ```
+   http://localhost:3000
+   ```
+3. Connect your MetaMask wallet to the application.
+
+## Help
+
+For common issues:
+
+1. Ensure MetaMask is installed and properly configured.
+2. Make sure you are connected to the correct Ethereum network.
+3. If you encounter any issues with dependencies, try:
+   ```bash
+   npm install --force
+   ```
+
+## Authors
+
+Mandhar Thakur
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE.md file for details.
