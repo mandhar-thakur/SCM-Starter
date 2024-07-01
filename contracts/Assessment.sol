@@ -1,60 +1,84 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
-//import "hardhat/console.sol";
-
 contract Assessment {
-    address payable public owner;
-    uint256 public balance;
+    address payable public contractOwner;
+    uint256 public contractBalance;
 
-    event Deposit(uint256 amount);
-    event Withdraw(uint256 amount);
+    enum TransactionType { None, Deposit, Withdrawal }
+    enum TransactionStatus { None, Success, Failed }
 
-    constructor(uint initBalance) payable {
-        owner = payable(msg.sender);
-        balance = initBalance;
+    struct LastTransaction {
+        TransactionType transactionType;
+        TransactionStatus transactionStatus;
+        uint256 amount;
     }
 
-    function getBalance() public view returns(uint256){
-        return balance;
+    LastTransaction public lastTransaction;
+
+    event Deposited(uint256 amount);
+    event Withdrawn(uint256 amount);
+
+    constructor(uint initialBalance) payable {
+        contractOwner = payable(msg.sender);
+        contractBalance = initialBalance;
+        lastTransaction = LastTransaction(TransactionType.None, TransactionStatus.None, 0);
     }
 
-    function deposit(uint256 _amount) public payable {
-        uint _previousBalance = balance;
-
-        // make sure this is the owner
-        require(msg.sender == owner, "You are not the owner of this account");
-
-        // perform transaction
-        balance += _amount;
-
-        // assert transaction completed successfully
-        assert(balance == _previousBalance + _amount);
-
-        // emit the event
-        emit Deposit(_amount);
+    function retrieveBalance() public view returns(uint256){
+        return contractBalance;
     }
 
-    // custom error
-    error InsufficientBalance(uint256 balance, uint256 withdrawAmount);
+    function addFunds(uint256 amount) public payable {
+        uint previousBalance = contractBalance;
 
-    function withdraw(uint256 _withdrawAmount) public {
-        require(msg.sender == owner, "You are not the owner of this account");
-        uint _previousBalance = balance;
-        if (balance < _withdrawAmount) {
-            revert InsufficientBalance({
-                balance: balance,
-                withdrawAmount: _withdrawAmount
+        // ensure the sender is the owner
+        require(msg.sender == contractOwner, "Only the owner can perform this action");
+
+        // perform the deposit
+        contractBalance += amount;
+
+        // ensure the deposit was successful
+        assert(contractBalance == previousBalance + amount);
+
+        // update last transaction
+        lastTransaction = LastTransaction(TransactionType.Deposit, TransactionStatus.Success, amount);
+
+        // emit the deposit event
+        emit Deposited(amount);
+    }
+
+    // Custom error for insufficient balance
+    error NotEnoughBalance(uint256 currentBalance, uint256 withdrawalAmount);
+
+    function removeFunds(uint256 amount) public {
+        require(msg.sender == contractOwner, "Only the owner can perform this action");
+        uint previousBalance = contractBalance;
+
+        if (contractBalance < amount) {
+            // update last transaction to failed
+            lastTransaction = LastTransaction(TransactionType.Withdrawal, TransactionStatus.Failed, amount);
+            
+            revert NotEnoughBalance({
+                currentBalance: contractBalance,
+                withdrawalAmount: amount
             });
         }
 
-        // withdraw the given amount
-        balance -= _withdrawAmount;
+        // perform the withdrawal
+        contractBalance -= amount;
 
-        // assert the balance is correct
-        assert(balance == (_previousBalance - _withdrawAmount));
+        // ensure the withdrawal was successful
+        assert(contractBalance == (previousBalance - amount));
 
-        // emit the event
-        emit Withdraw(_withdrawAmount);
+        // update last transaction
+        lastTransaction = LastTransaction(TransactionType.Withdrawal, TransactionStatus.Success, amount);
+
+        // emit the withdrawal event
+        emit Withdrawn(amount);
+    }
+
+    function getLastTransaction() public view returns (TransactionType, TransactionStatus, uint256) {
+        return (lastTransaction.transactionType, lastTransaction.transactionStatus, lastTransaction.amount);
     }
 }
